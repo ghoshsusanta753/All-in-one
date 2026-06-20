@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>V14 Multi-Asset Option Seller | Professional Trading Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --dark-bg: #0f172a;
+            --card-bg: #1e293b;
+            --input-bg: #334155;
+            --border-color: #475569;
+            --primary: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-tertiary: #94a3b8;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #1a1f35 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        /* ========== HEADER ========== */
+        header {
+            background: linear-gradient(135deg, var(--card-bg) 0%, rgba(30, 41, 59, 0.8) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 35px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, #3b82f6, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: var(--text-tertiary);
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        /* ========== TABS ========== */
+        .tab-container {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--border-color);
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            color: var(--text-tertiary);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+            bottom: -2px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ========== LAYOUT ========== */
+        .content-wrapper {
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 1024px) {
+            .content-wrapper {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ========== INPUT PANEL ========== */
+        .input-panel {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 30px;
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+
+        .input-panel h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .input-panel h3::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(180deg, var(--primary), var(--success));
+            border-radius: 2px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-tertiary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 14px;
+            background-color: var(--input-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--primary);
+            background-color: rgba(59, 130, 246, 0.05);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-group input::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        /* ========== BUTTONS ========== */
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 20px -3px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        /* ========== OUTPUT GRID ========== */
+        .output-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        /* ========== CARDS ========== */
+        .box {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 28px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+        }
+
+        .box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), rgba(59, 130, 246, 0.5));
+        }
+
+        .box:hover {
+            border-color: var(--primary);
+            box-shadow: 0 15px 25px -5px rgba(59, 130, 246, 0.15);
+        }
+
+        .box.bullish {
+            border-color: var(--success);
+        }
+
+        .box.bullish::before {
+            background: linear-gradient(90deg, var(--success), rgba(16, 185, 129, 0.5));
+        }
+
+        .box.bearish {
+            border-color: var(--danger);
+        }
+
+        .box.bearish::before {
+            background: linear-gradient(90deg, var(--danger), rgba(239, 68, 68, 0.5));
+        }
+
+        .box.warning {
+            border-color: var(--warning);
+        }
+
+        .box.warning::before {
+            background: linear-gradient(90deg, var(--warning), rgba(245, 158, 11, 0.5));
+        }
+
+        .box-label {
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .box-content {
+            font-size: 1.8rem;
+            font-weight: 800;
+            font-family: 'Courier New', monospace;
+            color: var(--text-primary);
+            word-break: break-word;
+            line-height: 1.4;
+        }
+
+        .box-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-tertiary);
+            margin-top: 8px;
+        }
+
+        /* ========== SECTIONS ========== */
+        .section-divider {
+            border: none;
+            border-top: 2px solid var(--border-color);
+            margin: 50px 0;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            color: var(--text-primary);
+            padding-left: 15px;
+            border-left: 4px solid var(--primary);
+        }
+
+        /* ========== SPECIAL LAYOUT ========== */
+        .directional-box {
+            grid-column: 1 / -1;
+        }
+
+        .toggle-block {
+            margin: 20px 0;
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            header {
+                padding: 25px;
+                margin-bottom: 20px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .input-panel {
+                position: relative;
+                top: auto;
+            }
+
+            .tab-container {
+                gap: 8px;
+            }
+
+            .tab-btn {
+                padding: 10px 16px;
+                font-size: 0.85rem;
+            }
+
+            .output-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .box {
+                padding: 20px;
+            }
+
+            .box-content {
+                font-size: 1.4rem;
+            }
+        }
+
+        /* ========== SCROLLBAR ========== */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--dark-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-tertiary);
+        }
+
+        /* ========== ANIMATIONS ========== */
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <header>
+            <h1>📊 V14 MULTI-ASSET OPTION SELLER</h1>
+            <p class="subtitle">Professional Trading Calculator | Strategy Analysis & Risk Management</p>
+        </header>
+
+        <!-- TABS -->
+        <div class="tab-container">
+            <button class="tab-btn active" onclick="switchTab(0)">Strategy Calculator</button>
+            <button class="tab-btn" onclick="switchTab(1)">IC Management</button>
+            <button class="tab-btn" onclick="switchTab(2)">Directional Setup</button>
+        </div>
+
+        <!-- ============= TAB 1: STRATEGY CALCULATOR ============= -->
+        <div class="tab-content active">
+            <div class="content-wrapper">
+                <div class="input-panel">
+                    <h3>Market Parameters</h3>
+
+                    <div class="form-group">
+                        <label>📈 Asset Class</label>
+                        <select id="asset" onchange="assetChanged()">
+                            <option>NIFTY</option>
+                            <option>SENSEX</option>
+                            <option>BANKNIFTY</option>
+                            <option>STOCK</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>💹 Spot Price</label>
+                        <input type="number" id="spot" placeholder="Enter current price">
+                    </div>
+
+                    <div class="form-group">
+                        <label>📊 VIX / IV</label>
+                        <input type="number" id="vix" placeholder="Volatility index" step="0.1">
+                    </div>
+
+                    <div class="form-group">
+                        <label>📏 ATR (14)</label>
+                        <input type="number" id="atr" placeholder="Average True Range">
+                    </div>
+
+                    <div class="form-group">
+                        <label>⚖️ PCR Ratio</label>
+                        <input type="number" id="pcr" placeholder="Put-Call Ratio" step="0.01">
+                    </div>
+
+                    <div class="form-group">
+                        <label>🎯 RSI (14)</label>
+                        <input type="number" id="rsi" min="0" max="100" placeholder="Relative Strength">
+                    </div>
+
+                    <div class="toggle-block" id="dayblock">
+                        <div class="form-group">
+                            <label>📅 Expiry Day</label>
+                            <select id="day">
+                                <option>D1 Wednesday</option>
+                                <option>D2 Thursday</option>
+                                <option>D3 Friday</option>
+                                <option>D4 Monday</option>
+                                <option>D5 Tuesday</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="toggle-block" id="dteblock" style="display:none">
+                        <div class="form-group">
+                            <label>⏰ Days Till Expiry</label>
+                            <input type="number" id="dte" placeholder="Remaining days">
+                        </div>
+                    </div>
+
+                    <button class="btn" onclick="calculate()">🔢 CALCULATE STRATEGY</button>
+                </div>
+
+                <div class="output-grid">
+                    <div class="box" id="biasBox">
+                        <div class="box-label">Market Bias</div>
+                        <div class="box-content" id="bias">—</div>
+                        <div class="box-subtitle">Based on RSI + PCR</div>
+                    </div>
+
+                    <div class="box warning">
+                        <div class="box-label">Risk Level</div>
+                        <div class="box-content" id="risk">—</div>
+                        <div class="box-subtitle">VIX-based assessment</div>
+                    </div>
+
+                    <div class="box">
+                        <div class="box-label">Probability of Profit</div>
+                        <div class="box-content" id="pop">—</div>
+                        <div class="box-subtitle">Based on DTE & POP model</div>
+                    </div>
+
+                    <div class="box directional-box">
+                        <div class="box-label">⚡ Iron Condor Zones</div>
+                        <div class="box-content" id="ic" style="font-size: 1.3rem; line-height: 2;">—</div>
+                    </div>
+
+                    <div class="box directional-box">
+                        <div class="box-label">🎲 Directional Setup</div>
+                        <div class="box-content" id="dir" style="font-size: 1.3rem; line-height: 2;">—</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============= TAB 2: IC MANAGEMENT ============= -->
+        <div class="tab-content">
+            <div class="content-wrapper">
+                <div class="input-panel">
+                    <h3>Position Details</h3>
+
+                    <div class="form-group">
+                        <label>PUT (PE) Current Price</label>
+                        <input type="number" id="peLtp" placeholder="Premium received" step="0.05">
+                    </div>
+
+                    <div class="form-group">
+                        <label>CALL (CE) Current Price</label>
+                        <input type="number" id="ceLtp" placeholder="Premium received" step="0.05">
+                    </div>
+
+                    <button class="btn" onclick="icCalc()">📋 CALCULATE TP / SL</button>
+                </div>
+
+                <div class="output-grid">
+                    <div class="box">
+                        <div class="box-label">PE Target Price</div>
+                        <div class="box-content" id="petp">—</div>
+                        <div class="box-subtitle">50% of premium collected</div>
+                    </div>
+
+                    <div class="box">
+                        <div class="box-label">PE Stop Loss</div>
+                        <div class="box-content" id="pesl">—</div>
+                        <div class="box-subtitle">150% of premium collected</div>
+                    </div>
+
+                    <div class="box">
+                        <div class="box-label">CE Target Price</div>
+                        <div class="box-content" id="cetp">—</div>
+                        <div class="box-subtitle">50% of premium collected</div>
+                    </div>
+
+                    <div class="box">
+                        <div class="box-label">CE Stop Loss</div>
+                        <div class="box-content" id="cesl">—</div>
+                        <div class="box-subtitle">150% of premium collected</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============= TAB 3: DIRECTIONAL SETUP ============= -->
+        <div class="tab-content">
+            <div class="content-wrapper">
+                <div class="input-panel">
+                    <h3>Spread Position</h3>
+
+                    <div class="form-group">
+                        <label>SHORT Strike Premium</label>
+                        <input type="number" id="sell" placeholder="Sell price" step="0.05">
+                    </div>
+
+                    <div class="form-group">
+                        <label>LONG Hedge Premium</label>
+                        <input type="number" id="buy" placeholder="Buy price" step="0.05">
+                    </div>
+
+                    <button class="btn" onclick="dirCalc()">📊 CALCULATE TP / SL</button>
+                </div>
+
+                <div class="output-grid">
+                    <div class="box">
+                        <div class="box-label">Target Profit</div>
+                        <div class="box-content" id="dtp">—</div>
+                        <div class="box-subtitle">50% of spread width</div>
+                    </div>
+
+                    <div class="box">
+                        <div class="box-label">Stop Loss Exit</div>
+                        <div class="box-content" id="dsl">—</div>
+                        <div class="box-subtitle">200% of spread width</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(index) {
+            const tabs = document.querySelectorAll('.tab-content');
+            const buttons = document.querySelectorAll('.tab-btn');
+            tabs.forEach(t => t.classList.remove('active'));
+            buttons.forEach(b => b.classList.remove('active'));
+            tabs[index].classList.add('active');
+            buttons[index].classList.add('active');
+        }
+
+        function assetChanged() {
+            const asset = document.getElementById("asset").value;
+            const dayblock = document.getElementById("dayblock");
+            const dteblock = document.getElementById("dteblock");
+            const daySelect = document.getElementById("day");
+
+            if (asset === "NIFTY") {
+                dayblock.style.display = "block";
+                dteblock.style.display = "none";
+                daySelect.innerHTML = '<option>D1 Wednesday</option><option>D2 Thursday</option><option>D3 Friday</option><option>D4 Monday</option><option>D5 Tuesday</option>';
+            } else if (asset === "SENSEX") {
+                dayblock.style.display = "block";
+                dteblock.style.display = "none";
+                daySelect.innerHTML = '<option>D1 Friday</option><option>D2 Monday</option><option>D3 Tuesday</option><option>D4 Wednesday</option><option>D5 Thursday</option>';
+            } else {
+                dayblock.style.display = "none";
+                dteblock.style.display = "block";
+            }
+        }
+
+        function calculate() {
+            const asset = document.getElementById("asset").value;
+            const spot = parseFloat(document.getElementById("spot").value);
+            const vix = parseFloat(document.getElementById("vix").value);
+            const atr = parseFloat(document.getElementById("atr").value);
+            const pcr = parseFloat(document.getElementById("pcr").value);
+            const rsi = parseFloat(document.getElementById("rsi").value);
+
+            if (!spot || !vix || !atr || !pcr || !rsi) {
+                alert("⚠️ Please fill all required fields");
+                return;
+            }
+
+            let score = 0;
+            if (rsi >= 55) score++;
+            if (rsi <= 45) score--;
+            if (pcr >= 1) score++;
+            if (pcr <= 0.95) score--;
+
+            let bias = "NEUTRAL";
+            let biasBox = document.getElementById("biasBox");
+            biasBox.className = "box";
+            
+            if (score >= 1) {
+                bias = "📈 BULLISH";
+                biasBox.classList.add("bullish");
+            } else if (score <= -1) {
+                bias = "📉 BEARISH";
+                biasBox.classList.add("bearish");
+            }
+
+            document.getElementById("bias").textContent = bias;
+
+            let risk = "LOW ✅";
+            if (vix >= 13) risk = "MEDIUM ⚠️";
+            if (vix >= 18) risk = "HIGH 🔴";
+            document.getElementById("risk").textContent = risk;
+
+            let pop = "—";
+            if (asset === "NIFTY" || asset === "SENSEX") {
+                const day = document.getElementById("day").value;
+                pop = day.includes("D1") ? "80%" : day.includes("D2") ? "83%" : day.includes("D3") ? "88%" : day.includes("D4") ? "92%" : "95%";
+            } else {
+                const dte = parseFloat(document.getElementById("dte").value);
+                pop = dte >= 20 ? "70%" : dte < 5 ? "90%" : "75-85%";
+            }
+            document.getElementById("pop").textContent = pop;
+
+            let step = 50, hedge = 200, multiplier = 1.0;
+            if (asset === "BANKNIFTY") { step = 100; hedge = 500; multiplier = 2.75; }
+            else if (asset === "SENSEX") { step = 100; hedge = 400; multiplier = 3.25; }
+            else if (asset === "STOCK") { step = 10; hedge = atr * 2; }
+
+            const move = spot * (vix / 100) * Math.sqrt(5 / 365) * multiplier + (atr * 0.20);
+            const pe = Math.floor((spot - move) / step) * step;
+            const ce = Math.ceil((spot + move) / step) * step;
+
+            document.getElementById("ic").innerHTML = 
+                `SELL PE: <strong>${pe}</strong><br>BUY PE: <strong>${pe - hedge}</strong><br>SELL CE: <strong>${ce}</strong><br>BUY CE: <strong>${ce + hedge}</strong>`;
+
+            if (bias.includes("BULLISH")) {
+                const sell = Math.floor(spot / step) * step;
+                const buy = sell - hedge;
+                document.getElementById("dir").innerHTML = `📊 BULL PUT SPREAD<br>SELL: <strong>${sell}</strong><br>BUY: <strong>${buy}</strong>`;
+            } else if (bias.includes("BEARISH")) {
+                const sell = Math.ceil(spot / step) * step;
+                const buy = sell + hedge;
+                document.getElementById("dir").innerHTML = `📊 BEAR CALL SPREAD<br>SELL: <strong>${sell}</strong><br>BUY: <strong>${buy}</strong>`;
+            } else {
+                document.getElementById("dir").innerHTML = "⚪ NO DIRECTIONAL TRADE<br>(Neutral market)";
+            }
+
+            document.getElementById("peLtp").value = pe;
+            document.getElementById("ceLtp").value = ce;
+        }
+
+        function icCalc() {
+            const pe = parseFloat(document.getElementById("peLtp").value);
+            const ce = parseFloat(document.getElementById("ceLtp").value);
+            if (!pe || !ce) { alert("⚠️ Enter PE and CE values"); return; }
+            document.getElementById("petp").textContent = (pe * 0.5).toFixed(2);
+            document.getElementById("pesl").textContent = (pe * 1.5).toFixed(2);
+            document.getElementById("cetp").textContent = (ce * 0.5).toFixed(2);
+            document.getElementById("cesl").textContent = (ce * 1.5).toFixed(2);
+        }
+
+        function dirCalc() {
+            const sell = parseFloat(document.getElementById("sell").value);
+            const buy = parseFloat(document.getElementById("buy").value);
+            if (!sell || !buy) { alert("⚠️ Enter Sell and Buy values"); return; }
+            const spread = sell - buy;
+            document.getElementById("dtp").textContent = (spread * 0.5).toFixed(2);
+            document.getElementById("dsl").textContent = (spread * 2).toFixed(2);
+        }
+
+        assetChanged();
+    </script>
+</body>
+</html>
